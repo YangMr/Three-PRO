@@ -29,7 +29,7 @@ function init() {
     1000
   );
 
-  camera.position.z = 0.1;
+  camera.position.z = 10;
 
   // 创建渲染器
   renderer = new THREE.WebGLRenderer({
@@ -224,61 +224,6 @@ function createLine() {
   scene.add(line);
 }
 
-// 创建全景贴图
-function createMap() {
-  // 创建球形缓冲几何体
-  const sphereGeo = new THREE.SphereGeometry(1, 32, 16);
-
-  // 创建纹理加载器
-  const texture = new THREE.TextureLoader().load("/image/earth.png");
-
-  // 创建材质
-  const material = new THREE.MeshBasicMaterial({ map: texture });
-
-  // 添加到物体
-  cube = new THREE.Mesh(sphereGeo, material);
-
-  // 添加到场景
-  scene.add(cube);
-}
-
-// 创建立方体贴图
-function createCubeMap() {
-  // 创建立方体图形
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
-  // 创建纹理加载器
-  const imgUrlArr = [
-    "posx.jpg",
-    "negx.jpg",
-    "posy.jpg",
-    "negy.jpg",
-    "posz.jpg",
-    "negz.jpg",
-  ];
-
-  const texturlLoader = new THREE.TextureLoader();
-  texturlLoader.setPath("image/park/");
-
-  // 创建材质并贴图
-  const materialArr = imgUrlArr.map((imgUrl) => {
-    const texturl = texturlLoader.load(imgUrl);
-    // threejs颜色通道设置rgb颜色(防止颜色太浅)
-    texturl.colorSpace = THREE.SRGBColorSpace;
-    return new THREE.MeshBasicMaterial({
-      map: texturl,
-      side: THREE.DoubleSide,
-    });
-  });
-
-  // 创建物体
-  cube = new THREE.Mesh(geometry, materialArr);
-
-  // 调整立方体沿着z轴做 -1 缩小(镜面反转)
-  cube.scale.set(1, 1, -1);
-  // 添加到场景
-  scene.add(cube);
-}
-
 // 创建性能监视器
 function createStats() {
   stats = new Stats();
@@ -328,9 +273,7 @@ createAxesHelper();
 // createCube();
 // createCircleCube();
 // createPoint();
-// createLine();
-// createMap();
-createCubeMap();
+createLine();
 
 // 调用场景适配方法
 resizeRender();

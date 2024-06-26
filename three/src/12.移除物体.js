@@ -1,4 +1,4 @@
-// 目标: 点材质与点物体
+// 目标: 删除屏幕的物体
 
 import * as THREE from "three";
 
@@ -13,9 +13,6 @@ import Stats from "three/examples/jsm/libs/stats.module";
 let scene, camera, renderer, controls, cube;
 let stats;
 
-// 创建分组
-const group = new THREE.Group();
-
 // 初始化three三要素
 function init() {
   // 创建场景
@@ -29,7 +26,7 @@ function init() {
     1000
   );
 
-  camera.position.z = 0.1;
+  camera.position.z = 5;
 
   // 创建渲染器
   renderer = new THREE.WebGLRenderer({
@@ -46,9 +43,6 @@ function init() {
 // 创建轨道控制器
 function createControls() {
   controls = new OrbitControls(camera, renderer.domElement);
-
-  // controls.autoRotate = true;
-  // controls.autoRotateSpeed = 1;
 }
 
 // 循环渲染方法
@@ -129,12 +123,9 @@ function createCube() {
     // 设置物体的位置
     cube.position.set(cubeObj.x, cubeObj.y, cubeObj.z);
 
-    // 将物体添加到分组中
-    group.add(cube);
+    // 场景
+    scene.add(cube);
   });
-
-  // 将分组添加到场景中
-  scene.add(group);
 
   // 创建图形
   // const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -153,132 +144,6 @@ function createCube() {
   // scene.add(cube);
 }
 
-// 创建球体
-function createCircleCube() {
-  // 图形(几何体)
-  const sphereGeo = new THREE.SphereGeometry(1, 32, 19); // 球体
-
-  // 平面缓冲几何体
-  const planeGeo = new THREE.PlaneGeometry(1, 1);
-
-  // 圆形缓冲几何体
-  const circleGeo = new THREE.CircleGeometry(5, 32);
-
-  // 材质
-  const sphere = new THREE.MeshBasicMaterial({ color: 0xff6600 });
-  const plain = new THREE.MeshBasicMaterial({
-    color: 0xcccccc,
-    side: THREE.DoubleSide,
-  });
-  const circle = new THREE.MeshBasicMaterial({
-    color: "purple",
-    side: THREE.DoubleSide,
-  });
-
-  // 物体
-  const cube1 = new THREE.Mesh(sphereGeo, sphere);
-  cube1.position.set(-1, -1, -1);
-  const cube2 = new THREE.Mesh(planeGeo, plain);
-  cube2.position.set(20, 20, 20);
-  const cube3 = new THREE.Mesh(circleGeo, circle);
-  cube3.position.set(-30, -5, 30);
-
-  // 添加到场景
-  scene.add(cube1);
-  scene.add(cube2);
-  scene.add(cube3);
-}
-
-// 使用点材质与点物体
-function createPoint() {
-  // 创建图形
-  const geometry = new THREE.SphereGeometry(1, 32, 16);
-  // 创建材质
-  const material = new THREE.PointsMaterial({ color: 0x6600fff, size: 0.05 });
-
-  // 创建物体
-  const cube = new THREE.Points(geometry, material);
-
-  // 添加到场景
-  scene.add(cube);
-}
-
-// 使用线材质与线物体
-function createLine() {
-  const points = [];
-
-  points.push(new THREE.Vector3(-1, 0, 0));
-  points.push(new THREE.Vector3(0, 1, 0));
-
-  points.push(new THREE.Vector3(1, 0, 0));
-  points.push(new THREE.Vector3(1, 1, 1));
-  // 创建一个简单的矩形. 在这里我们左上和右下顶点被复制了两次。
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-  // 创建材质
-  const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-
-  // 创建物体
-  const line = new THREE.LineLoop(geometry, material);
-
-  scene.add(line);
-}
-
-// 创建全景贴图
-function createMap() {
-  // 创建球形缓冲几何体
-  const sphereGeo = new THREE.SphereGeometry(1, 32, 16);
-
-  // 创建纹理加载器
-  const texture = new THREE.TextureLoader().load("/image/earth.png");
-
-  // 创建材质
-  const material = new THREE.MeshBasicMaterial({ map: texture });
-
-  // 添加到物体
-  cube = new THREE.Mesh(sphereGeo, material);
-
-  // 添加到场景
-  scene.add(cube);
-}
-
-// 创建立方体贴图
-function createCubeMap() {
-  // 创建立方体图形
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
-  // 创建纹理加载器
-  const imgUrlArr = [
-    "posx.jpg",
-    "negx.jpg",
-    "posy.jpg",
-    "negy.jpg",
-    "posz.jpg",
-    "negz.jpg",
-  ];
-
-  const texturlLoader = new THREE.TextureLoader();
-  texturlLoader.setPath("image/park/");
-
-  // 创建材质并贴图
-  const materialArr = imgUrlArr.map((imgUrl) => {
-    const texturl = texturlLoader.load(imgUrl);
-    // threejs颜色通道设置rgb颜色(防止颜色太浅)
-    texturl.colorSpace = THREE.SRGBColorSpace;
-    return new THREE.MeshBasicMaterial({
-      map: texturl,
-      side: THREE.DoubleSide,
-    });
-  });
-
-  // 创建物体
-  cube = new THREE.Mesh(geometry, materialArr);
-
-  // 调整立方体沿着z轴做 -1 缩小(镜面反转)
-  cube.scale.set(1, 1, -1);
-  // 添加到场景
-  scene.add(cube);
-}
-
 // 创建性能监视器
 function createStats() {
   stats = new Stats();
@@ -292,26 +157,16 @@ function createStats() {
 // 删除物体
 function removeCube() {
   window.addEventListener("dblclick", () => {
-    group.children.map((obj) => {
+    const arr = scene.children.filter((obj) => obj.name === "cube");
+    const cube = arr[0];
+    if (cube) {
       // 处理图形占用的内存
-      obj.geometry.dispose();
+      cube.geometry.dispose();
       // 处理材质占用的内存
-      obj.material.dispose();
-      // 分组中移除物体
-      group.remove(obj);
-    });
-
-    scene.remove(group);
-    // const arr = scene.children.filter((obj) => obj.name === "cube");
-    // const cube = arr[0];
-    // if (cube) {
-    //   // 处理图形占用的内存
-    //   cube.geometry.dispose();
-    //   // 处理材质占用的内存
-    //   cube.material.dispose();
-    //   // 从场景中移除物体
-    //   scene.remove(cube);
-    // }
+      cube.material.dispose();
+      // 从场景中移除物体
+      scene.remove(cube);
+    }
   });
 }
 
@@ -325,12 +180,7 @@ createControls();
 createAxesHelper();
 
 // 调用创建物体方法
-// createCube();
-// createCircleCube();
-// createPoint();
-// createLine();
-// createMap();
-createCubeMap();
+createCube();
 
 // 调用场景适配方法
 resizeRender();

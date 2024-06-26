@@ -29,7 +29,7 @@ function init() {
     1000
   );
 
-  camera.position.z = 0.1;
+  camera.position.z = 5;
 
   // 创建渲染器
   renderer = new THREE.WebGLRenderer({
@@ -272,9 +272,6 @@ function createCubeMap() {
 
   // 创建物体
   cube = new THREE.Mesh(geometry, materialArr);
-
-  // 调整立方体沿着z轴做 -1 缩小(镜面反转)
-  cube.scale.set(1, 1, -1);
   // 添加到场景
   scene.add(cube);
 }
