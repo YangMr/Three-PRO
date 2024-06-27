@@ -352,11 +352,6 @@ function createDom3D() {
   const tag = document.createElement("span");
   tag.innerHTML = "我是文字,-前进";
   tag.style.color = "#fff";
-  tag.addEventListener("click", (e) => {
-    alert("123567");
-    // 阻止事件冒泡
-    e.stopPropagation();
-  });
 
   // 2.转化为3d物体
   const tag3D = new CSS3DObject(tag);
@@ -373,51 +368,6 @@ function createDom3D() {
   labelRenderer.domElement.style.top = "0";
   labelRenderer.domElement.style.left = "0";
   document.body.appendChild(labelRenderer.domElement);
-}
-
-// 创建物体
-function createOneCude() {
-  // 创建几何形(图形)
-  const geometry = new THREE.BoxGeometry();
-
-  // 创建材质
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-  // 创建物体
-  const cube = new THREE.Mesh(geometry, material);
-
-  cube.name = "cube";
-
-  // 添加到场景
-  scene.add(cube);
-}
-
-// 设置物体事件
-function bindClick() {
-  window.addEventListener("click", () => {
-    // 定义光线投射
-    const raycaster = new THREE.Raycaster();
-    // 定义二维向量对象(保存转化后的平面x, y坐标轴)
-    const pointer = new THREE.Vector2();
-
-    // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    // 更新摄像机和鼠标之前的连线
-    raycaster.setFromCamera(pointer, camera);
-
-    // 获取这条线穿过了哪些物体,收集成一个数组
-    const list = raycaster.intersectObjects(scene.children);
-
-    // console.log("list", list);
-    list.forEach((item) => {
-      console.log(item);
-      if (item.object.name === "cube") {
-        alert("123");
-      }
-    });
-  });
 }
 
 // 创建性能监视器
@@ -463,7 +413,7 @@ init();
 createControls();
 
 // 调用创建坐标轴方法
-// createAxesHelper();
+createAxesHelper();
 
 // 调用创建物体方法
 // createCube();
@@ -474,8 +424,6 @@ createControls();
 // createCubeMap();
 // createCubeVideo();
 createDom3D();
-createOneCude();
-bindClick();
 
 // 调用场景适配方法
 resizeRender();

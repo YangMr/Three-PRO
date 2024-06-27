@@ -5,11 +5,6 @@ import * as THREE from "three";
 // 导入轨道控制器
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-import {
-  CSS3DObject,
-  CSS3DRenderer,
-} from "three/addons/renderers/CSS3DRenderer.js";
-
 // 导入性能监视器
 import Stats from "three/examples/jsm/libs/stats.module";
 
@@ -17,7 +12,6 @@ import Stats from "three/examples/jsm/libs/stats.module";
 
 let scene, camera, renderer, controls, cube;
 let stats;
-let labelRenderer;
 
 // 创建分组
 const group = new THREE.Group();
@@ -35,7 +29,7 @@ function init() {
     1000
   );
 
-  camera.position.z = 5;
+  camera.position.z = 0.1;
 
   // 创建渲染器
   renderer = new THREE.WebGLRenderer({
@@ -65,11 +59,11 @@ function renderLoop() {
   // 手动更新轨道控制器的场景
   controls.update();
 
-  // 渲染3d文件
-  labelRenderer.render(scene, camera);
-
-  // 根据当前计算机浏览器刷新帧率（默认 60 ��/秒），不断递归调用此函数渲染最新的画面状态
+  // 根据当前计算机浏览器刷新帧率（默认 60 次/秒），不断递归调用此函数渲染最新的画面状态
   requestAnimationFrame(renderLoop);
+
+  // 性能监视器数据循环更新
+  stats.update();
 }
 
 // 创建坐标轴
@@ -285,141 +279,6 @@ function createCubeMap() {
   scene.add(cube);
 }
 
-// 创建视频贴图
-function createCubeVideo() {
-  // 创建图形
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  let flag = false;
-  // 创建视频
-  const video = document.createElement("video");
-  video.src = "video/mouse_cat.mp4";
-  video.muted = true; // 静音
-  // 监听视频是否加载完成
-  // video.addEventListener("loadedmetadata", () => {
-  //   // 开始播放视频
-  //   video.stop();
-  // });
-
-  // 创建按钮
-  const btn = document.createElement("button");
-  btn.innerHTML = "play";
-  btn.style.position = "fixed";
-  btn.style.right = "0";
-  btn.style.top = "0";
-  document.body.appendChild(btn);
-  btn.addEventListener("click", () => {
-    video.muted = !video.muted;
-  });
-
-  const btn1 = document.createElement("button");
-  btn1.innerHTML = "play";
-  btn1.style.position = "fixed";
-  btn1.style.right = "100px";
-  btn1.style.top = "0";
-  document.body.appendChild(btn1);
-  btn1.addEventListener("click", () => {
-    if (flag) {
-      video.pause();
-      flag = false;
-    } else {
-      video.play();
-      flag = true;
-    }
-    // flag ? video.pause() : video.play();
-  });
-
-  // 创建视频加载(视频加载器)(创建纹理)
-  const videoTexture = new THREE.VideoTexture(video);
-
-  // 创建材质
-  const material = new THREE.MeshBasicMaterial({
-    map: videoTexture,
-    side: THREE.DoubleSide,
-  });
-
-  // 创建物体
-  cube = new THREE.Mesh(geometry, material);
-
-  // cube.scale.set(1, 1);
-
-  // 加入场景
-  scene.add(cube);
-}
-
-// 创建3D文本
-function createDom3D() {
-  // 1. 准备html元素
-  const tag = document.createElement("span");
-  tag.innerHTML = "我是文字,-前进";
-  tag.style.color = "#fff";
-  tag.addEventListener("click", (e) => {
-    alert("123567");
-    // 阻止事件冒泡
-    e.stopPropagation();
-  });
-
-  // 2.转化为3d物体
-  const tag3D = new CSS3DObject(tag);
-  tag3D.scale.set(1 / 50, 1 / 50, 1 / 50);
-  scene.add(tag3D);
-
-  // 3. 进行渲染
-  labelRenderer = new CSS3DRenderer();
-  labelRenderer.setSize(window.innerWidth, window.innerHeight);
-  // 在什么条件下让标签触发鼠标交互时间
-  labelRenderer.domElement.style.pointerEvents = "none";
-
-  labelRenderer.domElement.style.position = "fixed";
-  labelRenderer.domElement.style.top = "0";
-  labelRenderer.domElement.style.left = "0";
-  document.body.appendChild(labelRenderer.domElement);
-}
-
-// 创建物体
-function createOneCude() {
-  // 创建几何形(图形)
-  const geometry = new THREE.BoxGeometry();
-
-  // 创建材质
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-  // 创建物体
-  const cube = new THREE.Mesh(geometry, material);
-
-  cube.name = "cube";
-
-  // 添加到场景
-  scene.add(cube);
-}
-
-// 设置物体事件
-function bindClick() {
-  window.addEventListener("click", () => {
-    // 定义光线投射
-    const raycaster = new THREE.Raycaster();
-    // 定义二维向量对象(保存转化后的平面x, y坐标轴)
-    const pointer = new THREE.Vector2();
-
-    // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    // 更新摄像机和鼠标之前的连线
-    raycaster.setFromCamera(pointer, camera);
-
-    // 获取这条线穿过了哪些物体,收集成一个数组
-    const list = raycaster.intersectObjects(scene.children);
-
-    // console.log("list", list);
-    list.forEach((item) => {
-      console.log(item);
-      if (item.object.name === "cube") {
-        alert("123");
-      }
-    });
-  });
-}
-
 // 创建性能监视器
 function createStats() {
   stats = new Stats();
@@ -463,7 +322,7 @@ init();
 createControls();
 
 // 调用创建坐标轴方法
-// createAxesHelper();
+createAxesHelper();
 
 // 调用创建物体方法
 // createCube();
@@ -471,11 +330,7 @@ createControls();
 // createPoint();
 // createLine();
 // createMap();
-// createCubeMap();
-// createCubeVideo();
-createDom3D();
-createOneCude();
-bindClick();
+createCubeMap();
 
 // 调用场景适配方法
 resizeRender();

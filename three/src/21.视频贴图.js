@@ -17,7 +17,6 @@ import Stats from "three/examples/jsm/libs/stats.module";
 
 let scene, camera, renderer, controls, cube;
 let stats;
-let labelRenderer;
 
 // 创建分组
 const group = new THREE.Group();
@@ -65,11 +64,11 @@ function renderLoop() {
   // 手动更新轨道控制器的场景
   controls.update();
 
-  // 渲染3d文件
-  labelRenderer.render(scene, camera);
-
-  // 根据当前计算机浏览器刷新帧率（默认 60 ��/秒），不断递归调用此函数渲染最新的画面状态
+  // 根据当前计算机浏览器刷新帧率（默认 60 次/秒），不断递归调用此函数渲染最新的画面状态
   requestAnimationFrame(renderLoop);
+
+  // 性能监视器数据循环更新
+  stats.update();
 }
 
 // 创建坐标轴
@@ -351,73 +350,13 @@ function createDom3D() {
   // 1. 准备html元素
   const tag = document.createElement("span");
   tag.innerHTML = "我是文字,-前进";
-  tag.style.color = "#fff";
-  tag.addEventListener("click", (e) => {
-    alert("123567");
-    // 阻止事件冒泡
-    e.stopPropagation();
-  });
+  tag.style.color = "white";
 
   // 2.转化为3d物体
   const tag3D = new CSS3DObject(tag);
-  tag3D.scale.set(1 / 50, 1 / 50, 1 / 50);
+
   scene.add(tag3D);
-
   // 3. 进行渲染
-  labelRenderer = new CSS3DRenderer();
-  labelRenderer.setSize(window.innerWidth, window.innerHeight);
-  // 在什么条件下让标签触发鼠标交互时间
-  labelRenderer.domElement.style.pointerEvents = "none";
-
-  labelRenderer.domElement.style.position = "fixed";
-  labelRenderer.domElement.style.top = "0";
-  labelRenderer.domElement.style.left = "0";
-  document.body.appendChild(labelRenderer.domElement);
-}
-
-// 创建物体
-function createOneCude() {
-  // 创建几何形(图形)
-  const geometry = new THREE.BoxGeometry();
-
-  // 创建材质
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-
-  // 创建物体
-  const cube = new THREE.Mesh(geometry, material);
-
-  cube.name = "cube";
-
-  // 添加到场景
-  scene.add(cube);
-}
-
-// 设置物体事件
-function bindClick() {
-  window.addEventListener("click", () => {
-    // 定义光线投射
-    const raycaster = new THREE.Raycaster();
-    // 定义二维向量对象(保存转化后的平面x, y坐标轴)
-    const pointer = new THREE.Vector2();
-
-    // 将鼠标位置归一化为设备坐标。x 和 y 方向的取值范围是 (-1 to +1)
-    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    // 更新摄像机和鼠标之前的连线
-    raycaster.setFromCamera(pointer, camera);
-
-    // 获取这条线穿过了哪些物体,收集成一个数组
-    const list = raycaster.intersectObjects(scene.children);
-
-    // console.log("list", list);
-    list.forEach((item) => {
-      console.log(item);
-      if (item.object.name === "cube") {
-        alert("123");
-      }
-    });
-  });
 }
 
 // 创建性能监视器
@@ -463,7 +402,7 @@ init();
 createControls();
 
 // 调用创建坐标轴方法
-// createAxesHelper();
+createAxesHelper();
 
 // 调用创建物体方法
 // createCube();
@@ -472,10 +411,8 @@ createControls();
 // createLine();
 // createMap();
 // createCubeMap();
-// createCubeVideo();
-createDom3D();
-createOneCude();
-bindClick();
+createCubeVideo();
+// createDom3D();
 
 // 调用场景适配方法
 resizeRender();
