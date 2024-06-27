@@ -9,6 +9,7 @@ export let scene, camera, renderer, controls, css3dRenderer;
 (function init() {
   // 创建场景
   scene = new THREE.Scene();
+
   // 创建摄像机
   camera = new THREE.PerspectiveCamera(
     75,
