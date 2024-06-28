@@ -33,14 +33,15 @@ export let scene, camera, renderer, controls, css3dRenderer;
   controls = new OrbitControls(camera, renderer.domElement);
 
   // TODO:水平旋转的角度
+  controls.minPolarAngle = 0.25 * Math.PI;
 
   controls.enableZoom = false;
 })();
 
 // 坐标轴
 (function createAxes() {
-  const axesHelper = new THREE.AxesHelper(5);
-  scene.add(axesHelper);
+  // const axesHelper = new THREE.AxesHelper(5);
+  // scene.add(axesHelper);
 })();
 
 // 场景适配

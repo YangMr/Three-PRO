@@ -1,8 +1,8 @@
 import "./style.css";
 import * as THREE from "three";
 import { scene, camera } from "./utils/init";
-
-import dat from "dat.gui";
+import { CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
+import createGui from "./utils/gui";
 
 const sceneInfoObj = {
   one: {
@@ -41,10 +41,135 @@ const sceneInfoObj = {
       },
     ],
   },
+  three: {
+    publicPath: "technology/3/",
+    imgUrlArr: ["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"],
+    markList: [
+      {
+        name: "landMark",
+        imgUrl: "other/landmark.png",
+        wh: [0.05, 0.05],
+        position: [0.4, -0.18, 0.32],
+        rotation: [-1.53, -0.04, -1.26],
+        targerAttr: "two",
+      },
+      {
+        name: "landMark",
+        imgUrl: "other/landmark.png",
+        wh: [0.05, 0.05],
+        position: [0.32, -0.16, -0.33],
+        rotation: [1.46, 0.1, -0.17],
+        targerAttr: "four",
+      },
+    ],
+  },
+  four: {
+    publicPath: "technology/4/",
+    imgUrlArr: ["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"],
+    markList: [
+      {
+        name: "landMark",
+        imgUrl: "other/landmark.png",
+        wh: [0.05, 0.05],
+        position: [-0.35, -0.22, 0.4],
+        rotation: [-0.85, -0.45, -1.8],
+        targerAttr: "three",
+      },
+      {
+        name: "dom",
+        targerAttr: "five",
+        position: [0.49, 0, 0],
+        rotation: [0, -0.5 * Math.PI, 0],
+        active: (e) => {
+          setMaterialCube(sceneInfoObj.five);
+          e.stopPropagation();
+        },
+      },
+    ],
+  },
+  five: {
+    publicPath: "technology/5/",
+    imgUrlArr: ["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"],
+    markList: [
+      {
+        name: "landMark",
+        imgUrl: "other/landmark.png",
+        wh: [0.05, 0.05],
+        position: [0, -0.18, 0.4],
+        rotation: [0, 0, 0],
+        targerAttr: "four",
+      },
+      {
+        name: "video",
+        imgUrl: "video/movie.mp4",
+        wh: [0.2, 0.1],
+        position: [0.49, 0.04, 0.045],
+        rotation: [0, -0.5 * Math.PI, 0],
+      },
+      {
+        name: "landMark",
+        imgUrl: "other/landmark.png",
+        wh: [0.05, 0.05],
+        position: [-0.42, -0.19, -0.23],
+        rotation: [1.66, -0.29, 0.49],
+        targerAttr: "sex",
+      },
+    ],
+  },
+  sex: {
+    publicPath: "technology/6/",
+    imgUrlArr: ["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"],
+    markList: [
+      {
+        name: "landMark",
+        imgUrl: "other/landmark.png",
+        wh: [0.05, 0.05],
+        position: [0, -0.18, 0.4],
+        rotation: [0, 0, 0],
+        targerAttr: "five",
+      },
+      {
+        name: "video",
+        imgUrl: "video/movie.mp4",
+        wh: [0.2, 0.1],
+        position: [0.49, 0.04, 0.045],
+        rotation: [0, -0.5 * Math.PI, 0],
+      },
+      {
+        name: "landMark",
+        imgUrl: "other/landmark.png",
+        wh: [0.05, 0.05],
+        position: [-0.42, -0.19, -0.23],
+        rotation: [1.66, -0.29, 0.49],
+        targerAttr: "seven",
+      },
+    ],
+  },
+  seven: {
+    publicPath: "technology/7/",
+    imgUrlArr: ["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"],
+  },
 };
 
 // 创建组
 const group = new THREE.Group();
+
+// 清除标记点
+function clear() {
+  // 获取组中所有的物体
+  const list = [...group.children];
+  list.forEach((item) => {
+    if (!item.isObject3D) {
+      // 清除图形
+      item.geometry.dispose();
+      // 清除材质
+      item.material.dispose();
+    }
+
+    // 组中移除这个元素
+    group.remove(item);
+  });
+}
 
 // 创建立方缓冲几何体
 function createCube() {
@@ -68,18 +193,19 @@ function createCube() {
 // 设置材质进行贴图
 function setMaterialCube(infoObj) {
   // 清除上一个场景的标记点
+  clear();
 
   const { publicPath, imgUrlArr, markList } = infoObj;
 
   // 创建图片纹理加载器
   const textureLoader = new THREE.TextureLoader();
-  textureLoader.colorSpace = THREE.SRGBColorSpace;
+
   // 设置公共的图片路径
   textureLoader.setPath(publicPath);
   // 遍历所有的图片进行加载
   const materialArr = imgUrlArr.map((imgStr) => {
     const texture = textureLoader.load(imgStr);
-
+    texture.colorSpace = THREE.SRGBColorSpace;
     return new THREE.MeshBasicMaterial({
       map: texture,
       side: THREE.DoubleSide,
@@ -93,6 +219,10 @@ function setMaterialCube(infoObj) {
     if (markObj.name === "landMark") {
       // 调用创建标记点方法
       createLandMark(markObj);
+    } else if (markObj.name === "dom") {
+      createDomMark(markObj);
+    } else if (markObj.name === "video") {
+      createVideoMap(markObj);
     }
   });
 
@@ -129,7 +259,7 @@ function createLandMark(markObj) {
 
   mesh.userData.attr = targerAttr;
 
-  // createGui(mesh);
+  createGui(mesh);
   // 标记点添加到组
   group.add(mesh);
 }
@@ -155,9 +285,74 @@ function bindClick() {
       if (mesh.object.name === "mark") {
         const infoObj = sceneInfoObj[mesh.object.userData.attr];
         setMaterialCube(infoObj);
+      } else if (mesh.object.name === "video") {
+        // console.log("mesh.attr", mesh.attr);
+        playPauseVideo(video);
       }
     });
   });
+}
+
+// 将dom元素转化为3d
+function createDomMark(markObj) {
+  const { position, name, rotation, active } = markObj;
+
+  // 创建dom元素
+  const tag = document.createElement("span");
+  tag.innerHTML = "前进";
+  tag.className = "mark-style";
+  tag.style.pointerEvents = "none";
+  tag.addEventListener("click", (e) => {
+    active(e);
+  });
+
+  // 将dom元素转换为3d
+  const tag3d = new CSS3DObject(tag);
+  tag3d.scale.set(1 / 800, 1 / 800, 1 / 800);
+  tag3d.position.set(...position);
+  tag3d.rotation.set(...rotation);
+  tag3d.name = name;
+  group.add(tag3d);
+}
+let video;
+// 创建视频贴图
+function createVideoMap(markObj) {
+  const { wh, imgUrl, position, rotation, name } = markObj;
+  // 创建图形
+  const geometry = new THREE.PlaneGeometry(...wh);
+
+  video = document.createElement("video");
+  video.src = imgUrl;
+  video.muted = true;
+  // video.addEventListener("loadeddata", () => {
+  //   video.play();
+  // });
+
+  const videoTexture = new THREE.VideoTexture(video);
+
+  // 创建材质
+  const material = new THREE.MeshBasicMaterial({ map: videoTexture });
+
+  // 创建物体
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.name = name;
+
+  mesh.position.set(...position);
+  mesh.rotation.set(...rotation);
+
+  // 添加组
+  group.add(mesh);
+}
+
+// 播放与暂停的方法
+function playPauseVideo(video) {
+  if (video.paused) {
+    video.play();
+    video.muted = false;
+  } else {
+    video.pause();
+    video.muted = true;
+  }
 }
 
 let cubeObj = createCube();
@@ -165,16 +360,3 @@ let cubeObj = createCube();
 setMaterialCube(sceneInfoObj.one);
 
 bindClick();
-
-function createGui(m) {
-  // 创建dat.GUI实例
-
-  const gui = new dat.GUI();
-
-  gui.add(m.position, "x", -1, 2).step(0.01);
-  gui.add(m.position, "y", -1, 2).step(0.01);
-  gui.add(m.position, "z", -1, 2).step(0.01);
-  gui.add(m.rotation, "x", -1, 2).step(0.01);
-  gui.add(m.rotation, "y", -1, 2).step(0.01);
-  gui.add(m.rotation, "z", -1, 2).step(0.01);
-}
