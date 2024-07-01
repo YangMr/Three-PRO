@@ -1,7 +1,8 @@
 // 初始化 three.js 基础环境
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-export let scene, camera, renderer, controls;
+import { CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
+export let scene, camera, renderer, controls, css2DRenderer;
 
 // 初始化三要素
 (function init() {
@@ -48,9 +49,23 @@ export let scene, camera, renderer, controls;
   });
 })();
 
-//
+// 创建2d渲染器
+(function create2dRenderer() {
+  css2DRenderer = new CSS2DRenderer();
+  css2DRenderer.setSize(window.innerWidth, window.innerHeight);
+  css2DRenderer.domElement.style.position = "fixed";
+  css2DRenderer.domElement.style.left = 0;
+  css2DRenderer.domElement.style.top = 0;
+  css2DRenderer.domElement.style.pointerEvents = "none";
+  document.body.appendChild(css2DRenderer.domElement);
+})();
+
+// 循环渲染
 (function renderLoop() {
   renderer.render(scene, camera);
+
+  css2DRenderer.render(scene, camera);
+
   controls.update();
   requestAnimationFrame(renderLoop);
 })();

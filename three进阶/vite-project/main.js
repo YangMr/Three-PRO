@@ -1,92 +1,132 @@
+// 目标：创建 MySphere 类，并创建 5 个球体
+// 1. 创建 BaseModel 提取公共属性和方法
+// 2. 修改 MyCube 类继承自 BaseModal 类
+// 3. 创建 MySphere 类并实例化 5 个球体
+
+import { scene } from "./utils/init";
 import * as THREE from "three";
-import { scene, renderer } from "./utils/init";
 
-import gsap from "gsap";
+// 1. 创建 BaseModel 提取公共属性和方法
 
-// createCube();
-// createLight();
+class BaseModal {
+  constructor(scene) {
+    // 用来保存创建的物体
+    this.model = null;
 
-// 创建平面
-function createFloor() {
-  // 创建图形
-  const geometry = new THREE.PlaneGeometry(3, 3);
-  // 创建材质
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    side: THREE.DoubleSide,
-  });
+    // 保存创建的场景
+    this.scene = scene;
 
-  // 创建物体
-  const plain = new THREE.Mesh(geometry, material);
+    // 创建颜色
+    this.color = new THREE.Color(
+      `rgb(${Math.floor(Math.random() * (256 - 1 + 1) + 0)},${Math.floor(
+        Math.random() * (256 - 1 + 1) + 0
+      )},${Math.floor(Math.random() * (256 - 1 + 1) + 0)})`
+    );
 
-  plain.rotation.set(-Math.PI / 2, 0, 0);
-  // 接受阴影
-  plain.receiveShadow = true;
+    // 创建位置
+    this.position = [
+      Math.floor(Math.random() * (5 - 0 + 1) + 0),
+      Math.floor(Math.random() * (5 - 0 + 1) + 0),
+      Math.floor(Math.random() * (5 - 0 + 1) + 0),
+    ];
+  }
 
-  // 添加到场景
-  scene.add(plain);
+  // 随机切换颜色
+  randColor() {
+    this.model.material.color = new THREE.Color(
+      `rgb(${Math.floor(Math.random() * 256)},${Math.floor(
+        Math.random() * 256
+      )},${Math.floor(Math.random() * 256)} )`
+    );
+  }
 }
 
-let mesh;
+// 2. 创建立方缓冲几何体类、
 
-// 创建球形缓冲几何体
-function createSphereBufferGeometry() {
-  const geometry = new THREE.SphereGeometry(0.5, 32, 16);
-  const material = new THREE.MeshStandardMaterial({
-    color: 0x00ff00,
-  });
-  mesh = new THREE.Mesh(geometry, material);
-  mesh.castShadow = true;
-  mesh.position.set(0, 0, 0);
-  scene.add(mesh);
+class MyCube extends BaseModal {
+  constructor(scene) {
+    super(scene);
+
+    // 设置大小
+    this.size = [
+      Math.floor(Math.random() * (3 - 1 + 1) + 1),
+      Math.floor(Math.random() * (3 - 1 + 1) + 1),
+      Math.floor(Math.random() * (3 - 1 + 1) + 1),
+    ];
+
+    this.init();
+  }
+
+  init() {
+    // 创建图形
+    const geometry = new THREE.BoxGeometry(...this.size);
+
+    // 创建材质
+    const material = new THREE.MeshBasicMaterial({
+      color: this.color,
+    });
+
+    // 创建物体
+    const mesh = new THREE.Mesh(geometry, material);
+
+    // 设置立方缓存几何体坐标
+    mesh.position.set(...this.position);
+
+    // 添加到场景
+    this.scene.add(mesh);
+
+    // 将创建的物体交给变量保存
+    this.model = mesh;
+  }
 }
 
-// 创建光源
-let spotLight;
-function createLight1() {
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(1, 1, 1);
-  scene.add(light);
+// 3. 创建球形缓存几何体体类
+class MySphere extends BaseModal {
+  constructor(scene) {
+    super(scene);
 
-  spotLight = new THREE.DirectionalLightHelper(light, 1);
-  scene.add(spotLight);
+    // 设置球体的半径
+    this.radius = Math.floor(Math.random() * (2 - 1 + 1) + 1);
+
+    this.init();
+  }
+
+  init() {
+    // 创建图形
+    const geometry = new THREE.SphereGeometry(this.radius, 32, 16);
+
+    // 创建材质
+    const material = new THREE.MeshBasicMaterial({
+      color: this.color,
+    });
+
+    // 创建物体
+    const mesh = new THREE.Mesh(geometry, material);
+
+    // 设置球体坐标
+    mesh.position.set(...this.position);
+
+    // 添加到场景
+    this.scene.add(mesh);
+
+    // 将创建的物体交给变量保存
+    this.model = mesh;
+  }
 }
 
-// 动画方法
-function initAnimate() {
-  const aniObj = gsap.to(mesh.position, {
-    x: 5, // 对参数 1 目标对象做什么属性的变化
-    duration: 3, // 动画持续时间
-    delay: 2, // 延迟 2 秒后在做当前动画
-    repeat: -1, // 无限次反复运动
-    yoyo: true, // 回到原点过程也有一个动画
-    ease: "expo.out", // 设置缓冲效果（参考： https://greensock.com/docs/v3/Eases）调整使用的内置字符串模式
-    onStart() {
-      console.log("开始动画");
-    },
-    onUpdate() {
-      console.log("动画更新");
-      spotLight.update(); // 让平行光辅助对象可以实时更新角度和射线
-    },
-    onComplete() {
-      console.log("动画结束");
-    },
-  });
+// // 创建立方体
+// const myCube = new MyCube(scene);
 
-  window.addEventListener("dblclick", () => {
-    if (aniObj.isActive()) {
-      // 当前动画运行中为 true
-      aniObj.pause();
-    } else {
-      // 暂停->恢复
-      aniObj.resume();
-    }
-  });
+// // 创建球体
+// const yySphere = new MySphere(scene);
+const arr = [];
+for (let i = 0; i < 5; i++) {
+  arr.push(new MyCube(scene));
+  arr.push(new MySphere(scene));
 }
 
-renderer.shadowMap.enabled = true;
-createFloor();
-createSphereBufferGeometry();
-createLight1();
-
-initAnimate();
+window.addEventListener("dblclick", () => {
+  arr.forEach((item) => {
+    item.randColor();
+  });
+});
