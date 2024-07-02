@@ -1,6 +1,7 @@
 *{
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 html,body{
     width: 100%;
@@ -17,5 +18,65 @@ html,body{
 }
 .tool{
     flex : 1;
-    background-color: pink;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-bottom: 60px;
+}
+
+.group_list{
+    overflow-y: auto;
+}
+.group{
+    padding:10px;
+    text-align: center;
+}
+.group .title{
+    font-size: 15px;
+}
+.item_wrap{
+    display: flex;
+}
+
+.item_wrap > div{
+    flex : 1;
+    font-size : 12px;
+}
+.item_wrap  .col{
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.group p{
+    margin: 5px;
+}
+
+.info_btn{
+    padding : 10px 0;
+    border : 1px solid #ccc;
+    cursor: pointer;
+}
+
+.price{
+    justify-content: space-between;
+    display: flex;
+    position: absolute;
+    left: 0;
+    bottom : 0;
+    width: 100%;
+    background-color: #fff;
+    border-top:1px solid #ccc;
+    padding: 20px 15px;
+    align-items: center;
+}
+
+.price .next_btn{
+    color : #fff;
+    background-color: #bb0a30;
+    font-size : 12px;
+    padding:10px 15px;
+    cursor: pointer;
 }
