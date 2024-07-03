@@ -22,7 +22,7 @@ function init() {
     1000
   );
 
-  camera.position.z = 1;
+  camera.position.set(3, 1.5, 3);
 
   // 创建渲染器(画布) antialias:true 开启抗锯齿
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -52,6 +52,7 @@ function init() {
 // 创建轨道控制器
 function createOrbitControls() {
   controls = new OrbitControls(camera, renderer.domElement);
+
   //   controls.enableDamping = true; // 阻尼效果，让物体在转动时速度慢下来
   //   controls.dampingFactor = 0.25; // 阻尼系数，值越小，阻尼越明显
   //   controls.enableZoom = true; // 开启缩放

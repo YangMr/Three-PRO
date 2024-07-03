@@ -1,17 +1,37 @@
 import * as THREE from "three";
+import { EventBus } from "@/utils/EventBus";
+
 export class MySky {
   constructor(scene) {
     this.scene = scene;
+    this.nowMesh = [];
+
+    this.nowSkyName = "展厅";
     this.init();
   }
 
   // 初始化场景
   init() {
     // 调用创建室内展厅方法
-    // this.createInDoor();
+    this.createInDoor();
+
+    EventBus.getInstance().on("changeSky", (skyName) => {
+      if (skyName === this.nowSkyName) return;
+
+      // 清除上一次的场景物体
+      this.clear();
+
+      if (skyName === "展厅") {
+        this.createInDoor();
+        this.nowSkyName = "展厅";
+      } else if (skyName === "户外") {
+        this.createOutDoor();
+        this.nowSkyName = "户外";
+      }
+    });
 
     // 调用创建室外展厅方法
-    this.createOutDoor();
+    // this.createOutDoor();
   }
 
   // 创建室内展厅方法
@@ -31,6 +51,8 @@ export class MySky {
     // 添加到场景
     this.scene.add(sphere);
 
+    this.nowMesh.push(sphere);
+
     // 创建地面
     const circleGeo = new THREE.CircleGeometry(10, 32);
     const circleMaterial = new THREE.MeshStandardMaterial({
@@ -44,6 +66,8 @@ export class MySky {
     circle.receiveShadow = true;
 
     this.scene.add(circle);
+
+    this.nowMesh.push(circle);
   }
 
   // 创建户外展厅方法
@@ -67,6 +91,8 @@ export class MySky {
     // 添加到场景
     this.scene.add(sphere);
 
+    this.nowMesh.push(sphere);
+
     // 创建地面
     const circleGeo = new THREE.CircleGeometry(10, 32);
     // 创建纹理加载器
@@ -83,5 +109,25 @@ export class MySky {
     circle.receiveShadow = true;
 
     this.scene.add(circle);
+
+    this.nowMesh.push(circle);
+  }
+
+  // 清除球体和地面
+  clear() {
+    this.nowMesh.forEach((obj) => {
+      // 释放几何体内存
+      obj.geometry.dispose();
+      // 释放材质内存
+      obj.material.dispose();
+
+      // 释放纹理对象内存
+      obj.material.map && obj.material.map.dispose();
+
+      //移除当前的物体
+      obj.parent.remove(obj);
+    });
+
+    this.nowMesh = [];
   }
 }

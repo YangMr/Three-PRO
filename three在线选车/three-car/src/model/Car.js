@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { MySprite } from "./MySprite";
 import { ClickHandler } from "@/utils/ClickHandle";
+import { EventBus } from "@/utils/EventBus";
 import gsap from "gsap";
 export class MyCar {
   constructor(model, scene, camera, controls) {
@@ -65,6 +66,51 @@ export class MyCar {
       },
     };
 
+    // 汽车各种视角坐标对象
+    this.positionObj = {
+      // 主驾驶
+      main: {
+        // 摄像机坐标
+        camera: {
+          x: 0.36,
+          y: 0.96,
+          z: -0.16,
+        },
+        // 轨道控制器坐标
+        controls: {
+          x: 0.36,
+          y: 0.87,
+          z: 0.03,
+        },
+      },
+      // 副驾驶
+      copilot: {
+        camera: {
+          x: -0.39,
+          y: 0.87,
+          z: 0.07,
+        },
+        controls: {
+          x: -0.39,
+          y: 0.85,
+          z: 0.13,
+        },
+      },
+      // 外观
+      outside: {
+        camera: {
+          x: 3,
+          y: 1.5,
+          z: 3,
+        },
+        controls: {
+          x: 0,
+          y: 0,
+          z: 0,
+        },
+      },
+    };
+
     this.init();
 
     this.modifyCarDefault();
@@ -75,9 +121,27 @@ export class MyCar {
   init() {
     this.scene.add(this.model);
 
+    this.controls.autoRotate = true;
+
+    setTimeout(() => {
+      this.controls.autoRotate = false;
+    }, 10000);
+
     // 匹配出所需要的模型
     Object.values(this.carModel.body).forEach((obj) => {
       obj.model = this.model.getObjectByName(obj.name);
+    });
+
+    // 修改车辆颜色
+    EventBus.getInstance().on("changeCarColor", (colorStr) => {
+      Object.values(this.carModel.body).forEach((obj) => {
+        obj.model.material.color = new THREE.Color(colorStr);
+      });
+    });
+
+    // 切换汽车视角
+    EventBus.getInstance().on("changeCarAngleView", (viewName) => {
+      this.setCameraAnimation(this.positionObj[viewName]);
     });
   }
 
@@ -126,20 +190,6 @@ export class MyCar {
               this.setDoorAnimation(targetDoor.rotation, { x: 0 });
               targetDoor.userData.isOpen = false;
             }
-
-            // this.camera.position.set(-0.28, 0.738, -0.259);
-            // this.camera.rotation.set(-163.72, -3.2, -179.07);
-
-            this.setCameraAnimation({
-              camera: {
-                x: -0.28,
-                y: 0.738,
-                z: -0.259,
-                rotationX: -163.72,
-                rotationY: -3.2,
-                rotationZ: -179.07,
-              },
-            });
           });
         }
       });
@@ -159,6 +209,12 @@ export class MyCar {
   setCameraAnimation(dataObj) {
     gsap.to(this.camera.position, {
       ...dataObj.camera,
+      duration: 1,
+      ease: "power1.in",
+    });
+
+    gsap.to(this.controls.position, {
+      ...dataObj.controls,
       duration: 1,
       ease: "power1.in",
     });
