@@ -32,7 +32,7 @@ export class MyLight {
 
   // 创建聚光灯
   createSportL() {
-    const light = new THREE.SpotLight(0xffffff, 1000);
+    const light = new THREE.SpotLight(0xffffff, 1);
 
     // 开启阴影支持
     light.castShadow = true;

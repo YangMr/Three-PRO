@@ -1,3 +1,7 @@
 import "./style/base.css";
 
-import "./entry/index";
+import { camera } from "./entry/index";
+
+import { ClickHandler } from "./utils/ClickHandle";
+
+ClickHandler.getInstance().init(camera);

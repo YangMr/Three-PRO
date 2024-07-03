@@ -17,7 +17,7 @@ export function loadManager(path) {
         resolve(gltf.scene);
       },
       (process) => {
-        console.log("process", process);
+        // console.log("process", process);
       },
       (error) => {
         reject(error);
