@@ -33,3 +33,14 @@ lookDivList.forEach((element) => {
     EventBus.getInstance().emit("changeCarAngleView", lookPos);
   });
 });
+
+/**
+ * 贴膜切换
+ */
+const coatDivList = document.querySelectorAll(".coat_group > div");
+coatDivList.forEach((element) => {
+  element.addEventListener("click", () => {
+    const coat = element.dataset.coa;
+    EventBus.getInstance().emit("changeCarCoat", coat);
+  });
+});

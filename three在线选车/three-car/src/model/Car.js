@@ -3,6 +3,7 @@ import { MySprite } from "./MySprite";
 import { ClickHandler } from "@/utils/ClickHandle";
 import { EventBus } from "@/utils/EventBus";
 import gsap from "gsap";
+
 export class MyCar {
   constructor(model, scene, camera, controls) {
     this.model = model;
@@ -64,6 +65,21 @@ export class MyCar {
           model: {},
         },
       },
+
+      glass: {
+        front: {
+          name: "Object_90",
+          model: {},
+        },
+        leftGlass: {
+          name: "Object_68",
+          model: {},
+        },
+        rightGlass: {
+          name: "Object_81",
+          model: {},
+        },
+      },
     };
 
     // 汽车各种视角坐标对象
@@ -80,7 +96,7 @@ export class MyCar {
         controls: {
           x: 0.36,
           y: 0.87,
-          z: 0.03,
+          z: 1.53,
         },
       },
       // 副驾驶
@@ -121,14 +137,20 @@ export class MyCar {
   init() {
     this.scene.add(this.model);
 
-    this.controls.autoRotate = true;
+    this.model.traverse((obj) => (obj.castShadow = true));
 
-    setTimeout(() => {
-      this.controls.autoRotate = false;
-    }, 10000);
+    // this.controls.autoRotate = true;
+
+    // setTimeout(() => {
+    //   this.controls.autoRotate = false;
+    // }, 10000);
 
     // 匹配出所需要的模型
     Object.values(this.carModel.body).forEach((obj) => {
+      obj.model = this.model.getObjectByName(obj.name);
+    });
+
+    Object.values(this.carModel.glass).forEach((obj) => {
       obj.model = this.model.getObjectByName(obj.name);
     });
 
@@ -137,6 +159,33 @@ export class MyCar {
       Object.values(this.carModel.body).forEach((obj) => {
         obj.model.material.color = new THREE.Color(colorStr);
       });
+    });
+
+    // 修改贴膜
+    EventBus.getInstance().on("changeCarCoat", (coatName) => {
+      if (coatName === "高光") {
+        Object.values(this.carModel.body).forEach((obj) => {
+          // 粗糙度
+          obj.model.material.roughness = 0.5;
+
+          // 金属度
+          obj.model.material.metalness = 1;
+
+          // 清晰度
+          obj.model.material.clearcoat = 1;
+        });
+      } else if (coatName === "磨砂") {
+        Object.values(this.carModel.body).forEach((obj) => {
+          // 粗糙度
+          obj.model.material.roughness = 1;
+
+          // 金属度
+          obj.model.material.metalness = 0.5;
+
+          // 清晰度
+          obj.model.material.clearcoat = 0;
+        });
+      }
     });
 
     // 切换汽车视角
@@ -150,7 +199,7 @@ export class MyCar {
     Object.values(this.carModel.body).forEach((obj) => {
       obj.model.material = new THREE.MeshPhysicalMaterial({
         color: 0xff9900,
-        // 光泽度
+        // 光泽度/ 金属度
         metalness: 1,
         // 粗糙度
         roughness: 0.5,
@@ -159,6 +208,10 @@ export class MyCar {
         // 2. 设置清漆度的粗糙度
         clearcoatRoughness: 0,
       });
+    });
+
+    Object.values(this.carModel.glass).forEach((obj) => {
+      obj.model.material.side = THREE.FrontSide;
     });
   }
 

@@ -6,45 +6,31 @@
 
 import { scene } from "./utils/init";
 import * as THREE from "three";
-import dat from "dat.gui";
 
 // 创建物体
 function initBase() {
   // 1. 创建球形缓存几何体
   const geometry = new THREE.SphereGeometry(1, 32, 16);
+  const base = new THREE.TextureLoader().load("texture/one/basecolor.jpg");
+  base.colorSpace = THREE.SRGBColorSpace;
 
-  const cubeLoad = new THREE.CubeTextureLoader();
-  const cubeTexture = cubeLoad
-    .setPath("image/sky/")
-    .load(["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"]);
-
-  const material = new THREE.MeshPhysicalMaterial({
-    envMap: cubeTexture,
-    // side: THREE.DoubleSide,
-    roughness: 0,
-    metalness: 1,
-    // 1. 设置清漆度（0 - 1）
-    clearcoat: 1,
-    // 2. 设置清漆度的粗糙度
-    clearcoatRoughness: 1,
+  const texture = new THREE.TextureLoader().load("texture/one/metalness.jpg");
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.MeshStandardMaterial({
+    map: base,
+    side: THREE.DoubleSide,
+    // 粗糙度设置（0 光滑， 1 粗糙）
+    // roughness: 1,
+    // roughnessMap: texture,
+    metalness: 1, // 金属度（光反射的光泽程度，1 是最高）
+    metalnessMap: texture, // 金属度贴图
   });
-
-  const gui = new dat.GUI();
-  gui.add(material, "roughness", 0, 1, 0.1);
-  gui.add(material, "metalness", 0, 1, 0.1);
-  gui.add(material, "clearcoat", 0, 1, 0.1);
-  gui.add(material, "clearcoatRoughness", 0, 1, 0.1);
-
-  scene.background = cubeTexture;
-
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 }
 
 // 创建灯光
 function createLight() {
-  const ambientLight = new THREE.AmbientLight(0xffffff);
-  scene.add(ambientLight);
   const light = new THREE.DirectionalLight(0xffffff, 1);
   light.position.set(0, 3, 3);
   scene.add(light);

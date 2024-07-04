@@ -21,8 +21,8 @@ function init() {
     0.1,
     1000
   );
-
-  camera.position.set(3, 1.5, 3);
+  camera.position.z = 0.1;
+  // camera.position.set(3, 1.5, 3);
 
   // 创建渲染器(画布) antialias:true 开启抗锯齿
   renderer = new THREE.WebGLRenderer({ antialias: true });
